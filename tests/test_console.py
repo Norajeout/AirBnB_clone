@@ -280,4 +280,4 @@ EOF  all  create  destroy  help  quit  show  update
             with patch('sys.stdout', new=StringIO()) as f:
                 HBNBCommand().onecmd("update {} 1212121".format(className))
                 expected = "** no instance found **\n"
-                self.assertEqual(expected, f.getvalue()
+                self.assertEqual(expected, f.getvalue())
