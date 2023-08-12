@@ -1,20 +1,15 @@
 #!/usr/bin/python3
 """
-    State modules
+This is 'state' module.
+Functions and Classes:
+    class State(BaseModel):
 """
+
+
 from models.base_model import BaseModel
 
 
 class State(BaseModel):
-    """
-        Class state inherit from Base
-            Attribute:
-                name (str) : name of state
-    """
-    name = ""
+    """representing a state"""
 
-    def __init__(self, *args, **kwargs):
-        """
-            Init
-        """
-        super().__init__(*args, **kwargs)
+    name = ""

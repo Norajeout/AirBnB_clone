@@ -1,82 +1,76 @@
 #!/usr/bin/python3
 """
-    file storage modules
+This program creates a simple flow of serialization/deserialization:
+Instance <-> Dictionary <-> JSON string <-> file
+Functions and classes:
+    class FileStorage:
 """
-import json
-from models.base_model import BaseModel
-from models.user import User
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-from models.amenity import Amenity
 
 
 class FileStorage:
-    """
-        File Storage Class
-    """
+    """serializes instances to a JSON file
+    and deserializes JSON file to instances"""
+
     __file_path = "file.json"
     __objects = {}
 
     def all(self):
-        """
-        since __object is private class attribute
-        we access it like so
-        :return:
-        """
+        """return __objects"""
+
         return self.__objects
 
     def new(self, obj):
-        """
-        we add the object to the __objects attribute
-        the key is generated as <obj class name>.id
-        :obj : can have multi type class
-        :return: None
-        """
-        # att of that obj/instance
-        dict_attrs = obj.to_dict()
-        # generate some thing like "BaseModel.135489484231"
-        new_key = "{}.{}".format(dict_attrs["__class__"], dict_attrs["id"])
-        # in the class att we append that obj
-        self.__objects[new_key] = obj
-        # print("from new", FileStorage.__objects)
+        """adds a new object to __objects dictionary"""
+
+        key = str(obj.__class__.__name__) + '.' + str(obj.id)
+        self.__objects[key] = obj
 
     def save(self):
-        """
-            each object/instance in the private class att __objects
-            we serialise the instance (by creating a newDict of
-            key and dict of attrs)
-            then write the newDict to the file.json
-        """
-        json_obj = {}
-        for key in self.__objects:
-            json_obj[key] = self.__objects[key].to_dict()
-        with open(self.__file_path, 'w') as file:
-            json.dump(json_obj, file, indent=2)
+        """serializes __objects to the JSON file"""
+
+        from json import dump
+
+        file_name = self.__file_path
+
+        to_json = dict(self.__objects)
+        for k, v in to_json.items():
+            to_json[k] = v.to_dict()
+
+        with open(file_name, "w", encoding="UTF-8") as f:
+            dump(to_json, f)
 
     def reload(self):
-        """
-        read from the file, deserialize the dict obtained from the file
-        each val from the dict is a dict of args and kwargs of an instance
-        each key found represent an instance we check if it
-        exit else we create new one
-        and append if to the __objects
-        :return: None
-        """
-        try:
-            with open(FileStorage.__file_path, mode="r") as file:
-                content = file.read()
-                dict_from_file = {}
-                if content != "":
-                    dict_from_file = json.loads(content)  # type = dict
+        """deserializes the JSON file to __objects"""
 
-                for file_key, dict_obj in dict_from_file.items():
-                    # if the key_file is not in the storage.keys()
-                    # create a new instance and pass it argument and kwargs
-                    if file_key not in FileStorage.__objects.keys():
-                        className = dict_obj["__class__"]
-                        newInst = eval("{}(**dict_obj)".format(className))
-                        self.new(newInst)
+        from json import load
+        from models.base_model import BaseModel
+        from models.user import User
+        from models.amenity import Amenity
+        from models.place import Place
+        from models.city import City
+        from models.review import Review
+        from models.state import State
+
+        file_name = self.__file_path
+        try:
+            with open(file_name, "r", encoding="UTF-8") as f:
+                from_json = load(f)
+                for k, v in from_json.items():
+                    if 'BaseModel' in k:
+                        from_json[k] = BaseModel(**v)
+                    elif 'User' in k:
+                        from_json[k] = User(**v)
+                    elif 'State' in k:
+                        from_json[k] = State(**v)
+                    elif 'City' in k:
+                        from_json[k] = City(**v)
+                    elif 'Amenity' in k:
+                        from_json[k] = Amenity(**v)
+                    elif 'Place' in k:
+                        from_json[k] = Place(**v)
+                    elif 'Review' in k:
+                        from_json[k] = Review(**v)
+
+                self.__objects = dict(from_json)
         except FileNotFoundError:
             pass

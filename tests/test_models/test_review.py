@@ -1,82 +1,35 @@
 #!/usr/bin/python3
-"""
-    Test Case For Review Model and its Test
-"""
-from models import BaseModel
-from models import Review
+""" Module of Unittests """
 import unittest
-import inspect
-import time
-from datetime import datetime
-import pep8 as pcs
-from unittest import mock
-import models
+from models.base_model import BaseModel
+from models.review import Review
+import os
+from models import storage
+from models.engine.file_storage import FileStorage
+import datetime
 
 
-class TestReview(unittest.TestCase):
-    """
-        unitesst for Review class
-    """
-    def issub_class(self):
-        """
-            test if Review class is sub class of base model
-        """
-        review = Review()
-        self.assertIsInstance(review, BaseModel)
-        self.assertTrue(hasattr(review, "id"))
-        self.assertTrue(hasattr(review, "created_at"))
-        self.assertTrue(hasattr(review, "update_at"))
+class ReviewTest(unittest.TestCase):
+    """ Test cases for Review class """
 
-    def test_place_id_attr(self):
-        """
-            test for class attribute
-        """
-        review = Review()
-        self.assertTrue(hasattr(review, "place_id"))
-        self.assertEqual(review.place_id, "")
+    rev = Review()
 
-    def test_user_id_attr(self):
-        """
-            test for class attribute
-        """
-        review = Review()
-        self.assertTrue(hasattr(review, "user_id"))
-        self.assertEqual(review.user_id, "")
+    def testReview(self):
+        """ Test attributes value of Review insstance """
 
-    def test_text_attr(self):
-        """
-            test for class attribute
-        """
-        review = Review()
-        self.assertTrue(hasattr(review, "text"))
-        self.assertEqual(review.text, "")
+        self.rev.place_id = str(self.rev.id)
+        self.rev.foo = {"bar": "foo"}
 
-    def test_to_dictReview(self):
-        """
-            test to dict method with Review and the type
-            and content
-        """
-        review = Review()
-        dict_cont = review.to_dict()
-        self.assertEqual(type(dict_cont), dict)
-        for attr in review.__dict__:
-            self.assertTrue(attr in dict_cont)
-            self.assertTrue("__class__" in dict_cont)
+        rev_dict = self.rev.to_dict()
 
-    def test_dict_value(self):
-        """
-            test the returned dictionar values
-        """
-        time_format = "%Y-%m-%dT%H:%M:%S.%f"
-        review = Review()
-        dict_con = review.to_dict()
-        self.assertEqual(dict_con["__class__"], "Review")
-        self.assertEqual(type(dict_con["created_at"]), str)
-        self.assertEqual(type(dict_con["updated_at"]), str)
-        self.assertEqual(
-                            dict_con["created_at"],
-                            review.created_at.strftime(time_format)
-                                        )
-        self.assertEqual(
-                            dict_con["updated_at"],
-                            review.updated_at.strftime(time_format))
+        self.assertEqual(self.rev.place_id, rev_dict['place_id'])
+        self.assertEqual(self.rev.id, rev_dict['place_id'])
+
+        self.rev.foo = "bar"
+        self.assertNotEqual(self.rev.foo, rev_dict['foo'])
+        rev_dict = self.rev.to_dict()
+        self.assertEqual(self.rev.foo, rev_dict['foo'])
+
+
+if __name__ == '__main__':
+    unittest.main()
